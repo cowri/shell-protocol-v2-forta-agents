@@ -19,6 +19,8 @@ import {
   COMPUTE_INPUT_AMOUNT_EVENT
 } from "./constant"
 
+import BigNumber from 'bignumber.js';
+
 
 const handleTransaction: HandleTransaction = async (
   txEvent: TransactionEvent
@@ -71,7 +73,7 @@ const handleTransaction: HandleTransaction = async (
     // extract wrap erc20 event arguments
     const { erc20Token, wrappedAmount, user } = erc20WrapEvent.args;
 
-    const normalizedValue = wrappedAmount.div(10 ** DECIMALS);
+    const normalizedValue = new BigNumber(wrappedAmount.toString()).dividedBy(new BigNumber(10 ** 18));
 
     if (normalizedValue.gt(5000)) {
       findings.push(
@@ -92,9 +94,9 @@ const handleTransaction: HandleTransaction = async (
 
 erc20UnWrapEvents.forEach((erc20UnWrapEvent) => {
     // extract unwrap erc20 event arguments
-    const { erc20Token, wrappedAmount, user } = erc20UnWrapEvent.args;
+    const { erc20Token, unwrappedAmount, user } = erc20UnWrapEvent.args;
 
-    const normalizedValue = wrappedAmount.div(10 ** DECIMALS);
+    const normalizedValue = new BigNumber(unwrappedAmount.toString()).dividedBy(new BigNumber(10 ** 18));
 
     if (normalizedValue.gt(5000)) {
       findings.push(
@@ -161,7 +163,7 @@ etherWrapEvents.forEach((etherWrapEvent) => {
   // extract ether wrap event arguments
   const { amount, user } = etherWrapEvent.args;
 
-  const normalizedValue = amount.div(10 ** DECIMALS);
+  const normalizedValue = new BigNumber(amount.toString()).dividedBy(new BigNumber(10 ** 18));
 
   if (normalizedValue.gt(25)) {
     findings.push(
@@ -184,7 +186,7 @@ etherUnWrapEvents.forEach((etherUnWrapEvent) => {
   // extract ether unwrap event arguments
   const { amount, user } = etherUnWrapEvent.args;
 
-  const normalizedValue = amount.div(10 ** DECIMALS);
+  const normalizedValue = new BigNumber(amount.toString()).dividedBy(new BigNumber(10 ** 18));
 
   if (normalizedValue.gt(25)) {
     findings.push(
@@ -206,7 +208,7 @@ computeOutputAmountEvents.forEach((computeOutputAmountEvent) => {
   // extract compute output event arguments
   const { primitive, inputAmount, user } = computeOutputAmountEvent.args;
 
-  const normalizedValue = inputAmount.div(10 ** DECIMALS);
+  const normalizedValue = new BigNumber(inputAmount.toString()).dividedBy(new BigNumber(10 ** 18));
 
   if (normalizedValue.gt(500)) {
     findings.push(
@@ -230,7 +232,7 @@ computeInputAmountEvents.forEach((computeInputAmountEvent) => {
   // extract compute output event arguments
   const { primitive, inputAmount, user } = computeInputAmountEvent.args;
 
-  const normalizedValue = inputAmount.div(10 ** DECIMALS);
+  const normalizedValue = new BigNumber(inputAmount.toString()).dividedBy(new BigNumber(10 ** 18));
 
   if (normalizedValue.gt(10000)) {
     findings.push(
