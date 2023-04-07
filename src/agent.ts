@@ -4,7 +4,7 @@ import {
   TransactionEvent,
   FindingSeverity,
   FindingType,
-  Initialize
+  ethers
 } from "forta-agent";
 
 import {
@@ -20,21 +20,12 @@ import {
 } from "./constant"
 
 
-let findingsCount = 0;
-
-const initialize: Initialize = async () => {
-  // do some initialization on startup e.g. fetch data
-}
-
 const handleTransaction: HandleTransaction = async (
   txEvent: TransactionEvent
 ) => {
   const findings: Finding[] = [];
 
   const DECIMALS = 18;
-
-  // limiting this agent to emit only 5 findings so that the alert feed is not spammed
-  if (findingsCount >= 5) return findings;
 
   const erc20WrapEvents = txEvent.filterLog(
     ERC20_WRAP_EVENT,
@@ -78,11 +69,11 @@ const handleTransaction: HandleTransaction = async (
 
   erc20WrapEvents.forEach((erc20WrapEvent) => {
     // extract wrap erc20 event arguments
-    const { erc20Token, transferredAmount, wrappedAmount, dust, user, oceanId } = erc20WrapEvent.args;
+    const { erc20Token, wrappedAmount, user } = erc20WrapEvent.args;
 
     const normalizedValue = wrappedAmount.div(10 ** DECIMALS);
 
-    if (normalizedValue.gt(10000)) {
+    if (normalizedValue.gt(5000)) {
       findings.push(
         Finding.fromObject({
           name: "Large ERC20 Amount Wrapped",
@@ -92,24 +83,20 @@ const handleTransaction: HandleTransaction = async (
           type: FindingType.Info,
           metadata: {
             erc20Token,
-            transferredAmount,
-            dust,
             user,
-            oceanId
           },
         })
       );
-      findingsCount++;
     }
   });
 
 erc20UnWrapEvents.forEach((erc20UnWrapEvent) => {
     // extract unwrap erc20 event arguments
-    const { erc20Token, transferredAmount, wrappedAmount, feeCharged, user, oceanId } = erc20UnWrapEvent.args;
+    const { erc20Token, wrappedAmount, user } = erc20UnWrapEvent.args;
 
     const normalizedValue = wrappedAmount.div(10 ** DECIMALS);
 
-    if (normalizedValue.gt(10000)) {
+    if (normalizedValue.gt(5000)) {
       findings.push(
         Finding.fromObject({
           name: "Large ERC20 Amount UnWrapped",
@@ -119,21 +106,17 @@ erc20UnWrapEvents.forEach((erc20UnWrapEvent) => {
           type: FindingType.Info,
           metadata: {
             erc20Token,
-            transferredAmount,
-            feeCharged,
             user,
-            oceanId
           },
         })
       );
-      findingsCount++;
     }
 });
 
 
 erc1155WrapEvents.forEach((erc1155WrapEvent) => {
     // extract wrap erc1155 event arguments
-    const { erc1155Token, erc1155Id, amount, user, oceanId } = erc1155WrapEvent.args;
+    const { erc1155Token, amount, user } = erc1155WrapEvent.args;
 
     if (amount.gt(1000)) {
       findings.push(
@@ -145,20 +128,17 @@ erc1155WrapEvents.forEach((erc1155WrapEvent) => {
           type: FindingType.Info,
           metadata: {
             erc1155Token,
-            erc1155Id,
             user,
-            oceanId
           },
         })
       );
-      findingsCount++;
     }
 });
 
 
 erc1155UnWrapEvents.forEach((erc1155UnWrapEvent) => {
     // extract wrap erc1155 event arguments
-    const { erc1155Token, erc1155Id, amount, feeCharged, user, oceanId } = erc1155UnWrapEvent.args;
+    const { erc1155Token, amount, user } = erc1155UnWrapEvent.args;
 
     if (amount.gt(1000)) {
       findings.push(
@@ -170,14 +150,10 @@ erc1155UnWrapEvents.forEach((erc1155UnWrapEvent) => {
           type: FindingType.Info,
           metadata: {
             erc1155Token,
-            erc1155Id,
-            feeCharged,
             user,
-            oceanId
           },
         })
       );
-      findingsCount++;
     }
 });
 
@@ -187,8 +163,7 @@ etherWrapEvents.forEach((etherWrapEvent) => {
 
   const normalizedValue = amount.div(10 ** DECIMALS);
 
-  // if more than 10,000 Tether were transferred, report it
-  if (normalizedValue.gt(10000)) {
+  if (normalizedValue.gt(25)) {
     findings.push(
       Finding.fromObject({
         name: "Large Ether Amount Wrapping",
@@ -201,19 +176,17 @@ etherWrapEvents.forEach((etherWrapEvent) => {
         },
       })
     );
-    findingsCount++;
   }
 });
 
 
 etherUnWrapEvents.forEach((etherUnWrapEvent) => {
   // extract ether unwrap event arguments
-  const { amount, feeCharged, user } = etherUnWrapEvent.args;
+  const { amount, user } = etherUnWrapEvent.args;
 
   const normalizedValue = amount.div(10 ** DECIMALS);
 
-  // if more than 10,000 Tether were transferred, report it
-  if (normalizedValue.gt(10000)) {
+  if (normalizedValue.gt(25)) {
     findings.push(
       Finding.fromObject({
         name: "Large Ether Amount UnWrapping",
@@ -222,23 +195,20 @@ etherUnWrapEvents.forEach((etherUnWrapEvent) => {
         severity: FindingSeverity.Low,
         type: FindingType.Info,
         metadata: {
-          feeCharged,
           user,
         },
       })
     );
-    findingsCount++;
   }
 });
 
 computeOutputAmountEvents.forEach((computeOutputAmountEvent) => {
   // extract compute output event arguments
-  const { primitive, inputToken, outputToken, inputAmount, outputAmount, user } = computeOutputAmountEvent.args;
-  // shift decimals of transfer value
+  const { primitive, inputAmount, user } = computeOutputAmountEvent.args;
+
   const normalizedValue = inputAmount.div(10 ** DECIMALS);
 
-  // if more than 10,000 Tether were transferred, report it
-  if (normalizedValue.gt(10000)) {
+  if (normalizedValue.gt(500)) {
     findings.push(
       Finding.fromObject({
         name: "Large Amount of input token swapped",
@@ -248,25 +218,20 @@ computeOutputAmountEvents.forEach((computeOutputAmountEvent) => {
         type: FindingType.Info,
         metadata: {
           primitive,
-          inputToken,
-          outputToken,
-          outputAmount,
           user,
         },
       })
     );
-    findingsCount++;
   }
 });
 
 
 computeInputAmountEvents.forEach((computeInputAmountEvent) => {
   // extract compute output event arguments
-  const { primitive, inputToken, outputToken, inputAmount, outputAmount, user } = computeInputAmountEvent.args;
-  // shift decimals of transfer value
+  const { primitive, inputAmount, user } = computeInputAmountEvent.args;
+
   const normalizedValue = inputAmount.div(10 ** DECIMALS);
 
-  // if more than 10,000 Tether were transferred, report it
   if (normalizedValue.gt(10000)) {
     findings.push(
       Finding.fromObject({
@@ -277,14 +242,10 @@ computeInputAmountEvents.forEach((computeInputAmountEvent) => {
         type: FindingType.Info,
         metadata: {
           primitive,
-          inputToken,
-          outputToken,
-          outputAmount,
           user,
         },
       })
     );
-    findingsCount++;
   }
 });
 return findings;
@@ -292,6 +253,5 @@ return findings;
 
 
 export default {
-  initialize,
   handleTransaction
 };
