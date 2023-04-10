@@ -1,4 +1,5 @@
-export const OCEAN_ADDRESS = "0xC32eB36f886F638fffD836DF44C124074cFe3584"
+export const OCEAN_ADDRESS = "0xC32eB36f886F638fffD836DF44C124074cFe3584";
+export const DECIMALS = 18;
 export const ERC20_WRAP_EVENT = "event Erc20Wrap(address indexed erc20Token, uint256 transferredAmount, uint256 wrappedAmount, uint256 dust, address indexed user, uint256 indexed oceanId)";
 export const ERC20_UNWRAP_EVENT = "event Erc20Unwrap(address indexed erc20Token, uint256 transferredAmount, uint256 unwrappedAmount, uint256 feeCharged, address indexed user, uint256 indexed oceanId)";
 export const ERC1155_WRAP_EVENT = "event Erc1155Wrap(address indexed erc1155Token, uint256 erc1155Id, uint256 amount, address indexed user, uint256 indexed oceanId)";

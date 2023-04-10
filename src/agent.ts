@@ -3,12 +3,12 @@ import {
   HandleTransaction,
   TransactionEvent,
   FindingSeverity,
-  FindingType,
-  ethers
+  FindingType
 } from "forta-agent";
 
 import {
   OCEAN_ADDRESS,
+  DECIMALS,
   ERC20_WRAP_EVENT,
   ERC20_UNWRAP_EVENT,
   ERC1155_WRAP_EVENT,
@@ -26,8 +26,6 @@ const handleTransaction: HandleTransaction = async (
   txEvent: TransactionEvent
 ) => {
   const findings: Finding[] = [];
-
-  const DECIMALS = 18;
 
   const erc20WrapEvents = txEvent.filterLog(
     ERC20_WRAP_EVENT,
@@ -69,11 +67,12 @@ const handleTransaction: HandleTransaction = async (
     OCEAN_ADDRESS
   );
 
-  erc20WrapEvents.forEach((erc20WrapEvent) => {
+erc20WrapEvents.forEach((erc20WrapEvent) => {
+   
     // extract wrap erc20 event arguments
     const { erc20Token, wrappedAmount, user } = erc20WrapEvent.args;
 
-    const normalizedValue = new BigNumber(wrappedAmount.toString()).dividedBy(new BigNumber(10 ** 18));
+    const normalizedValue = wrappedAmount ? new BigNumber(wrappedAmount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
 
     if (normalizedValue.gt(5000)) {
       findings.push(
@@ -96,12 +95,12 @@ erc20UnWrapEvents.forEach((erc20UnWrapEvent) => {
     // extract unwrap erc20 event arguments
     const { erc20Token, unwrappedAmount, user } = erc20UnWrapEvent.args;
 
-    const normalizedValue = new BigNumber(unwrappedAmount.toString()).dividedBy(new BigNumber(10 ** 18));
+    const normalizedValue = unwrappedAmount ? new BigNumber(unwrappedAmount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
 
     if (normalizedValue.gt(5000)) {
       findings.push(
         Finding.fromObject({
-          name: "Large ERC20 Amount UnWrapped",
+          name: "Large ERC20 Amount Unwrapped",
           description: `Large amount of erc20 token unwrapped: ${normalizedValue}`,
           alertId: "SHELL-V2-2",
           severity: FindingSeverity.Low,
@@ -115,12 +114,13 @@ erc20UnWrapEvents.forEach((erc20UnWrapEvent) => {
     }
 });
 
-
 erc1155WrapEvents.forEach((erc1155WrapEvent) => {
     // extract wrap erc1155 event arguments
-    const { erc1155Token, amount, user } = erc1155WrapEvent.args;
+    let { erc1155Token, amount, user } = erc1155WrapEvent.args;
 
-    if (amount.gt(1000)) {
+    amount = amount && !erc1155WrapEvent.args.feeCharged && erc1155Token ? amount : new BigNumber(0);
+
+    if (amount.gt(100)) {
       findings.push(
         Finding.fromObject({
           name: "Large ERC1155 Amount Wrapped",
@@ -137,15 +137,16 @@ erc1155WrapEvents.forEach((erc1155WrapEvent) => {
     }
 });
 
-
 erc1155UnWrapEvents.forEach((erc1155UnWrapEvent) => {
     // extract wrap erc1155 event arguments
-    const { erc1155Token, amount, user } = erc1155UnWrapEvent.args;
+    let { erc1155Token, amount, feeCharged, user } = erc1155UnWrapEvent.args;
 
-    if (amount.gt(1000)) {
+    amount = amount && feeCharged && erc1155Token ? amount : new BigNumber(0);
+
+    if (amount.gt(100)) {
       findings.push(
         Finding.fromObject({
-          name: "Large ERC1155 Amount UnWrapped",
+          name: "Large ERC1155 Amount Unwrapped",
           description: `Large amount of erc1155 token unwrapped: ${amount}`,
           alertId: "SHELL-V2-4",
           severity: FindingSeverity.Low,
@@ -162,8 +163,9 @@ erc1155UnWrapEvents.forEach((erc1155UnWrapEvent) => {
 etherWrapEvents.forEach((etherWrapEvent) => {
   // extract ether wrap event arguments
   const { amount, user } = etherWrapEvent.args;
+  console.log(etherWrapEvent.args)
 
-  const normalizedValue = new BigNumber(amount.toString()).dividedBy(new BigNumber(10 ** 18));
+  const normalizedValue = amount && !etherWrapEvent.args.feeCharged ? new BigNumber(amount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
 
   if (normalizedValue.gt(25)) {
     findings.push(
@@ -184,9 +186,9 @@ etherWrapEvents.forEach((etherWrapEvent) => {
 
 etherUnWrapEvents.forEach((etherUnWrapEvent) => {
   // extract ether unwrap event arguments
-  const { amount, user } = etherUnWrapEvent.args;
+  const { amount, feeCharged, user } = etherUnWrapEvent.args;
 
-  const normalizedValue = new BigNumber(amount.toString()).dividedBy(new BigNumber(10 ** 18));
+  const normalizedValue = amount && feeCharged ? new BigNumber(amount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
 
   if (normalizedValue.gt(25)) {
     findings.push(
@@ -208,7 +210,7 @@ computeOutputAmountEvents.forEach((computeOutputAmountEvent) => {
   // extract compute output event arguments
   const { primitive, inputAmount, user } = computeOutputAmountEvent.args;
 
-  const normalizedValue = new BigNumber(inputAmount.toString()).dividedBy(new BigNumber(10 ** 18));
+  const normalizedValue = inputAmount ? new BigNumber(inputAmount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
 
   if (normalizedValue.gt(500)) {
     findings.push(
@@ -232,7 +234,7 @@ computeInputAmountEvents.forEach((computeInputAmountEvent) => {
   // extract compute output event arguments
   const { primitive, inputAmount, user } = computeInputAmountEvent.args;
 
-  const normalizedValue = new BigNumber(inputAmount.toString()).dividedBy(new BigNumber(10 ** 18));
+  const normalizedValue = inputAmount ? new BigNumber(inputAmount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
 
   if (normalizedValue.gt(10000)) {
     findings.push(
@@ -252,7 +254,6 @@ computeInputAmountEvents.forEach((computeInputAmountEvent) => {
 });
 return findings;
 };
-
 
 export default {
   handleTransaction
