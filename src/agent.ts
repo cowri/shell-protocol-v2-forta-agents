@@ -75,7 +75,7 @@ erc20WrapEvents.forEach((erc20WrapEvent) => {
 
     const normalizedValue = wrappedAmount ? new BigNumber(wrappedAmount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
 
-    if (normalizedValue.gt(5000)) {
+    if (normalizedValue.gt(100)) {
       findings.push(
         Finding.fromObject({
           name: "Large ERC20 Amount Wrapped",
@@ -98,7 +98,7 @@ erc20UnWrapEvents.forEach((erc20UnWrapEvent) => {
 
     const normalizedValue = unwrappedAmount ? new BigNumber(unwrappedAmount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
 
-    if (normalizedValue.gt(5000)) {
+    if (normalizedValue.gt(100)) {
       findings.push(
         Finding.fromObject({
           name: "Large ERC20 Amount Unwrapped",
@@ -212,7 +212,7 @@ computeOutputAmountEvents.forEach((computeOutputAmountEvent) => {
 
   const normalizedValue = inputAmount ? new BigNumber(inputAmount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
   
-  if ((inputToken == ETHER_OCEAN_ID && normalizedValue.gt(15)) || normalizedValue.gt(500)) {
+  if ((inputToken == ETHER_OCEAN_ID && normalizedValue.gt(15)) || normalizedValue.gt(100)) {
     findings.push(
       Finding.fromObject({
         name: "Large Amount of input token swapped",
@@ -236,7 +236,7 @@ computeInputAmountEvents.forEach((computeInputAmountEvent) => {
 
   const normalizedValue = inputAmount ? new BigNumber(inputAmount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
 
-  if ((inputToken == ETHER_OCEAN_ID && normalizedValue.gt(15)) || normalizedValue.gt(500)) {
+  if ((inputToken == ETHER_OCEAN_ID && normalizedValue.gt(15)) || normalizedValue.gt(100)) {
     findings.push(
       Finding.fromObject({
         name: "Large Amount of input token swapped",
