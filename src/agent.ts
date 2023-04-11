@@ -16,7 +16,8 @@ import {
   ETHER_WRAP_EVENT,
   ETHER_UNWRAP_EVENT,
   COMPUTE_OUTPUT_AMOUNT_EVENT,
-  COMPUTE_INPUT_AMOUNT_EVENT
+  COMPUTE_INPUT_AMOUNT_EVENT,
+  ETHER_OCEAN_ID
 } from "./constant"
 
 import BigNumber from 'bignumber.js';
@@ -163,7 +164,6 @@ erc1155UnWrapEvents.forEach((erc1155UnWrapEvent) => {
 etherWrapEvents.forEach((etherWrapEvent) => {
   // extract ether wrap event arguments
   const { amount, user } = etherWrapEvent.args;
-  console.log(etherWrapEvent.args)
 
   const normalizedValue = amount && !etherWrapEvent.args.feeCharged ? new BigNumber(amount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
 
@@ -208,11 +208,11 @@ etherUnWrapEvents.forEach((etherUnWrapEvent) => {
 
 computeOutputAmountEvents.forEach((computeOutputAmountEvent) => {
   // extract compute output event arguments
-  const { primitive, inputAmount, user } = computeOutputAmountEvent.args;
+  const { primitive, inputAmount, inputToken, user } = computeOutputAmountEvent.args;
 
   const normalizedValue = inputAmount ? new BigNumber(inputAmount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
-
-  if (normalizedValue.gt(500)) {
+  
+  if ((inputToken == ETHER_OCEAN_ID && normalizedValue.gt(15)) || normalizedValue.gt(500)) {
     findings.push(
       Finding.fromObject({
         name: "Large Amount of input token swapped",
@@ -232,11 +232,11 @@ computeOutputAmountEvents.forEach((computeOutputAmountEvent) => {
 
 computeInputAmountEvents.forEach((computeInputAmountEvent) => {
   // extract compute output event arguments
-  const { primitive, inputAmount, user } = computeInputAmountEvent.args;
+  const { primitive, inputAmount, inputToken, user } = computeInputAmountEvent.args;
 
   const normalizedValue = inputAmount ? new BigNumber(inputAmount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
 
-  if (normalizedValue.gt(10000)) {
+  if ((inputToken == ETHER_OCEAN_ID && normalizedValue.gt(15)) || normalizedValue.gt(500)) {
     findings.push(
       Finding.fromObject({
         name: "Large Amount of input token swapped",

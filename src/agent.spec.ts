@@ -19,7 +19,8 @@ import {
   ETHER_WRAP_EVENT,
   ETHER_UNWRAP_EVENT,
   COMPUTE_OUTPUT_AMOUNT_EVENT,
-  COMPUTE_INPUT_AMOUNT_EVENT
+  COMPUTE_INPUT_AMOUNT_EVENT,
+  ETHER_OCEAN_ID
 } from "./constant"
 
 import BigNumber from 'bignumber.js';
@@ -277,7 +278,7 @@ describe("large amount of wrapping/unwrapping/swapping agent", () => {
 
       const normalizedValue = new BigNumber(mocketherWrappingEvent.args.amount.toString()).dividedBy(new BigNumber(10 ** DECIMALS));
   
-      expect(findings).toStrictEqual([
+      expect(findings).toEqual([
         Finding.fromObject({
           name: "Large Ether Amount UnWrapping",
           description: `Large amount of ether unwrapped: ${normalizedValue}`,
@@ -321,6 +322,68 @@ describe("large amount of wrapping/unwrapping/swapping agent", () => {
           name: "Large Amount of input token swapped",
           description: `Large Amount of input token swapped: ${normalizedValue}`,
           alertId: "SHELL-V2-7",
+          severity: FindingSeverity.Low,
+          type: FindingType.Info,
+          metadata: {
+            primitive : mockercomputeOutputAmountEvent.args.primitive,
+            user: mockercomputeOutputAmountEvent.args.user,
+          },
+        }),
+        Finding.fromObject({
+          name: "Large Amount of input token swapped",
+          description: `Large Amount of input token swapped: ${normalizedValue}`,
+          alertId: "SHELL-V2-8",
+          severity: FindingSeverity.Low,
+          type: FindingType.Info,
+          metadata: {
+            primitive : mockercomputeOutputAmountEvent.args.primitive,
+            user: mockercomputeOutputAmountEvent.args.user,
+          },
+        }),
+      ]);
+      expect(mockTxEvent.filterLog).toHaveBeenCalledTimes(8);
+      expect(mockTxEvent.filterLog).toHaveBeenCalledWith(
+        COMPUTE_OUTPUT_AMOUNT_EVENT,
+        OCEAN_ADDRESS
+      );
+    });
+
+    it("returns a finding if there is a large amount of eth being swapped", async () => {
+
+      const mockercomputeOutputAmountEvent = {
+        args: {
+          primitive: "0xprimitive",
+          inputToken: ETHER_OCEAN_ID,
+          outputToken: 466,
+          inputAmount: ethers.BigNumber.from("27000000000000000000"),
+          outputAmount: ethers.BigNumber.from("4000000000000000000000"),
+          user: "0xabc",
+        },
+      };
+      mockTxEvent.filterLog = jest
+        .fn()
+        .mockReturnValue([mockercomputeOutputAmountEvent]);
+
+      const findings = await handleTransaction(mockTxEvent);
+
+      const normalizedValue = new BigNumber(mockercomputeOutputAmountEvent.args.inputAmount.toString()).dividedBy(new BigNumber(10 ** DECIMALS));
+
+      expect(findings).toStrictEqual([
+        Finding.fromObject({
+          name: "Large Amount of input token swapped",
+          description: `Large Amount of input token swapped: ${normalizedValue}`,
+          alertId: "SHELL-V2-7",
+          severity: FindingSeverity.Low,
+          type: FindingType.Info,
+          metadata: {
+            primitive : mockercomputeOutputAmountEvent.args.primitive,
+            user: mockercomputeOutputAmountEvent.args.user,
+          },
+        }),
+        Finding.fromObject({
+          name: "Large Amount of input token swapped",
+          description: `Large Amount of input token swapped: ${normalizedValue}`,
+          alertId: "SHELL-V2-8",
           severity: FindingSeverity.Low,
           type: FindingType.Info,
           metadata: {

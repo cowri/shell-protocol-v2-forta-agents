@@ -8,3 +8,4 @@ export const ETHER_WRAP_EVENT = "event EtherWrap(uint256 amount, address indexed
 export const ETHER_UNWRAP_EVENT = "event EtherUnwrap(uint256 amount, uint256 feeCharged, address indexed user)";
 export const COMPUTE_OUTPUT_AMOUNT_EVENT = "event ComputeOutputAmount(address indexed primitive, uint256 inputToken, uint256 outputToken, uint256 inputAmount, uint256 outputAmount, address indexed user)"
 export const COMPUTE_INPUT_AMOUNT_EVENT = "event ComputeInputAmount(address indexed primitive, uint256 inputToken, uint256 outputToken, uint256 inputAmount, uint256 outputAmount, address indexed user)";
+export const ETHER_OCEAN_ID = 68598205499637732940393479723998335974150219832588297998851264911405221787060
