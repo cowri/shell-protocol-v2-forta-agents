@@ -1,8 +1,8 @@
 {
-  "name": "forta-agent-starter",
+  "name": "shell-v2-forta-agent",
   "version": "0.0.1",
-  "description": "Forta Agent Typescript starter project",
-  "repository": "https://github.com/forta-network/forta-bot-sdk/tree/master/starter-project",
+  "description": "Shell V2 Forta agent to track transaction with large amount of tokens being wrapped, unwrapped or swapped",
+  "repository": "https://github.com/cowri/shell-protocol-v2-forta-agents",
   "chainIds": [
     42161
   ],
