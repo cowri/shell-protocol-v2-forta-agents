@@ -75,7 +75,7 @@ const handleTransaction: HandleTransaction = async (
 
 		const normalizedValue = wrappedAmount ? new BigNumber(wrappedAmount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
 
-		if (normalizedValue.gt(100)) {
+		if (normalizedValue.gt(1000)) {
 			findings.push(
 				Finding.fromObject({
 					name: "Large ERC20 Amount Wrapped",
@@ -98,7 +98,7 @@ const handleTransaction: HandleTransaction = async (
 
 		const normalizedValue = unwrappedAmount ? new BigNumber(unwrappedAmount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
 
-		if (normalizedValue.gt(100)) {
+		if (normalizedValue.gt(1000)) {
 			findings.push(
 				Finding.fromObject({
 					name: "Large ERC20 Amount Unwrapped",
@@ -212,7 +212,7 @@ const handleTransaction: HandleTransaction = async (
 
 		const normalizedValue = inputAmount ? new BigNumber(inputAmount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
   
-		if ((inputToken == ETHER_OCEAN_ID && normalizedValue.gt(15)) || normalizedValue.gt(100)) {
+		if ((inputToken == ETHER_OCEAN_ID && normalizedValue.gt(15)) || normalizedValue.gt(1000)) {
 			findings.push(
 				Finding.fromObject({
 					name: "Large Amount of input token swapped",
@@ -236,7 +236,7 @@ const handleTransaction: HandleTransaction = async (
 
 		const normalizedValue = inputAmount ? new BigNumber(inputAmount.toString()).dividedBy(new BigNumber(10 ** DECIMALS)) : new BigNumber(0);
 
-		if ((inputToken == ETHER_OCEAN_ID && normalizedValue.gt(15)) || normalizedValue.gt(100)) {
+		if ((inputToken == ETHER_OCEAN_ID && normalizedValue.gt(15)) || normalizedValue.gt(1000)) {
 			findings.push(
 				Finding.fromObject({
 					name: "Large Amount of input token swapped",
